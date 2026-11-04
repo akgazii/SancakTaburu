@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Sancak Taburu</title>
+<style>
+  @font-face { font-family: Redaction35; src: url('Redaction_35/Redaction35-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; }
+  @font-face { font-family: Redaction35; src: url('Redaction_35/Redaction35-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; }
+  @font-face { font-family: Redaction35; src: url('Redaction_35/Redaction35-Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; }
+  :root { --bg: #070918; --bg2: #0f1229; --bg3: #181c3a; --ac: #542240; --ac2: #6e2c54; --on: #9a3f73; --hi: #e8a0c8; --mut: #9a96b0; --ln: #2a1433; --ov: rgba(7,9,24,0.95); }
+  * { box-sizing: border-box; border-radius: 0; }
+  body { margin: 0; display: flex; height: 100vh; overflow: hidden; font: 13px Redaction35, system-ui, sans-serif; background: var(--bg); color: #fff; scrollbar-color: var(--ac) var(--bg); }
+  #side { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; background: var(--bg); border-right: 2px solid var(--ac); }
+  #tabs { display: flex; border-bottom: 2px solid var(--ac); }
+  #tabs button { flex: 1; margin: 0; padding: 9px 2px; background: var(--bg2); color: var(--mut); font-size: 12px; position: relative; }
+  #tabs button:hover { background: var(--bg3); color: #fff; }
+  #tabs button.on { background: var(--ac); color: #fff; }
+  #tabs button .dot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background: var(--hi); }
+  .cl { background: var(--bg2); border-left: 3px solid var(--ac); padding: 9px 10px; margin-bottom: 12px; }
+  .cl.new { border-left-color: var(--hi); }
+  .cl .ver { display: flex; align-items: baseline; gap: 6px; }
+  .cl .ver b { font-size: 15px; color: var(--hi); }
+  .cl .ver span { margin-left: auto; color: var(--mut); font-size: 11px; }
+  .cl .ttl { font-weight: bold; margin: 2px 0 8px; color: #fff; }
+  .cl .it { display: flex; gap: 7px; margin: 6px 0; font-size: 12px; line-height: 1.45; color: #fff; }
+  .cl .it .ic { flex-shrink: 0; width: 18px; text-align: center; }
+  .cl .it b { color: #fff; }
+  .cl .fx { margin: 8px 0 0; padding-left: 18px; font-size: 12px; color: var(--mut); }
+  .cl .fx li { margin: 3px 0; }
+  .panel { padding: 10px; overflow-y: auto; flex: 1; }
+  #main { flex: 1; position: relative; }
+  canvas { display: block; }
+  h2 { font-size: 15px; margin: 4px 0 8px; color: #fff; }
+  h3 { font-size: 11px; margin: 14px 0 5px; padding-bottom: 3px; border-bottom: 1px solid var(--ac); color: #fff; text-transform: uppercase; letter-spacing: .5px; }
+  button { background: var(--ac); color: #fff; border: 0; padding: 5px 8px; margin: 2px 0; cursor: pointer; font: inherit; }
+  button:hover { background: var(--ac2); }
+  button.on { background: var(--on); }
+  .row { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  input[type=text], select { width: 100%; padding: 5px; background: var(--bg2); color: #fff; border: 1px solid var(--ac); font: inherit; }
+  input[type=range], input[type=checkbox] { accent-color: var(--on); }
+  input[type=range] { width: 100%; }
+  label { display: flex; justify-content: space-between; font-size: 12px; color: #fff; margin-top: 5px; }
+  .txt { font-size: 12px; line-height: 1.55; color: #fff; }
+  .box { background: var(--bg2); border: 1px solid var(--ln); padding: 8px; margin-top: 4px; }
+  .muted { color: var(--mut); }
+  a { color: var(--hi); cursor: pointer; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .kr { display: flex; align-items: center; gap: 6px; padding: 3px 2px; cursor: pointer; }
+  .kr:hover { background: var(--bg3); }
+  .kr .n { margin-left: auto; color: var(--mut); }
+  .sw { display: inline-block; width: 11px; height: 11px; flex-shrink: 0; }
+  .log div { padding: 2px 0; border-bottom: 1px solid var(--ln); }
+  .log .y { color: var(--mut); margin-right: 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  td { padding: 2px 4px; border-bottom: 1px solid var(--ln); }
+  td:last-child { text-align: right; color: var(--hi); }
+  .hidden { display: none !important; }
+  #msg { color: var(--hi); min-height: 16px; margin-top: 4px; }
+  #hint { position: absolute; bottom: 8px; left: 10px; color: #fff; font-size: 12px; pointer-events: none; text-shadow: 0 1px 2px #000; }
+  #hint.place { color: var(--hi); font-size: 15px; font-weight: bold; }
+  #admin { position: absolute; top: 10px; right: 10px; width: 290px; background: var(--ov); border: 2px solid var(--ac); padding: 10px; max-height: calc(100% - 20px); overflow-y: auto; z-index: 6; }
+  body.planOn #admin { right: 280px; }
+  #tree { position: absolute; inset: 0; background: rgba(7,9,24,0.97); overflow: auto; z-index: 5; }
+  #tree .th { position: sticky; top: 0; left: 0; display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: var(--bg2); border-bottom: 2px solid var(--ac); z-index: 2; }
+  #tree .tc { position: relative; }
+  #tree svg { position: absolute; left: 0; top: 0; pointer-events: none; }
+  .tb { position: absolute; width: 140px; height: 60px; background: var(--bg2); border: 2px solid var(--ac); border-left-width: 6px; padding: 4px 7px; font-size: 11px; line-height: 1.35; cursor: pointer; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+  .tb:hover { background: var(--bg3); }
+  .tb b { font-size: 12px; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb.dead { opacity: .55; filter: grayscale(.6); }
+  .tb.root { background: var(--ln); box-shadow: 0 0 0 2px var(--hi); }
+  .tb.king b { color: var(--hi); }
+  .tb .gl { position: absolute; top: 2px; right: 4px; font-size: 9px; color: var(--mut); }
+  #admin button { width: 100%; text-align: left; }
+  #spawnBar { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ov); border-top: 2px solid var(--ac); padding: 4px 8px; z-index: 3; }
+  #spawnBar .row { gap: 6px; }
+  #spawnBar label { display: inline-flex; gap: 4px; align-items: center; margin: 0; }
+  #spawnBar select, #spawnBar input { width: auto; padding: 3px; background: var(--bg2); color: #fff; border: 1px solid var(--ac); font: inherit; }
+  #spawnBar input[type=number] { width: 58px; }
+  #spSub { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding: 3px 0 5px; border-bottom: 1px solid var(--ac); margin-bottom: 4px; }
+  #spMsg { color: var(--hi); }
+  body.planOn #spawnBar { right: 270px; }
+  body.planOn #hint { right: 280px; }
+  .spArmy { flex: 1; max-width: 900px; display: grid; grid-template-columns: minmax(0, 1fr) 176px; column-gap: 8px; row-gap: 4px; align-items: center; }
+  .spHead { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  #spawnBar .spHead select { max-width: 150px; padding: 2px 3px; }
+  .spHead #spMsg { margin-left: 6px; font-size: 12px; }
+  .spL { color: var(--mut); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-left: 6px; }
+  .spL:first-child { margin-left: 0; }
+  .spSides { display: inline-flex; gap: 3px; }
+  #spawnBar .spSides button { display: inline-flex; margin: 0; padding: 4px; background: var(--bg2); border: 1px solid var(--ac); }
+  #spawnBar .spSides button .sw { width: 12px; height: 12px; }
+  #spawnBar .spSides button:hover { background: var(--ac); }
+  #spawnBar .spSides button.on { background: var(--ac); border-color: #fff; }
+  .spEra { display: inline-flex; }
+  #spawnBar .spEra button { margin: 0; padding: 2px 8px; font-size: 12px; background: var(--bg2); border: 1px solid var(--ac); }
+  #spawnBar .spEra button + button { border-left: 0; }
+  #spawnBar .spEra button:hover { background: var(--ac); }
+  #spawnBar .spEra button.on { background: var(--on); border-color: #fff; }
+  .spTop { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 12px; }
+  .spTop b { font-size: 17px; color: var(--hi); }
+  #spawnBar .spTop button { margin: 0; padding: 2px 8px; font-size: 12px; }
+  .spUnits { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .uc { background: var(--bg2); border: 1px solid var(--ac); cursor: pointer; min-width: 0; }
+  .uc:hover { border-color: var(--on); }
+  .uc canvas { display: block; width: 100%; height: 30px; background: var(--bg); }
+  .uc .un { text-align: center; font-size: 11px; line-height: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .uc .uq { display: grid; grid-template-columns: 18px minmax(0, 1fr) 18px; border-top: 1px solid var(--ac); }
+  #spawnBar .uc .uq button { margin: 0; padding: 0; height: 19px; background: var(--ac); font-size: 14px; line-height: 1; }
+  #spawnBar .uc .uq button:hover { background: var(--on); }
+  #spawnBar .uc input { width: 100%; min-width: 0; padding: 0; border: 0; background: none; text-align: center; font: bold 14px Redaction35, system-ui; color: #fff; -moz-appearance: textfield; }
+  #spawnBar .uc input::-webkit-inner-spin-button, #spawnBar .uc input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  .uc.zero canvas, .uc.zero .un { opacity: .35; }
+  #spawnBar .uc.zero input { color: var(--mut); font-weight: normal; }
+  .spArmy.painting .uc.brush { border-color: var(--hi); box-shadow: inset 0 0 0 1px var(--hi); }
+  .spAct { display: flex; flex-direction: column; gap: 3px; align-self: stretch; justify-content: space-between; }
+  .spPreRow { display: flex; gap: 3px; }
+  #spawnBar .spPreRow select { flex: 1; min-width: 0; padding: 2px 3px; }
+  #spawnBar .spPreRow button { margin: 0; padding: 2px 6px; }
+  #spawnBar .spAct > button { margin: 0; width: 100%; padding: 4px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #spawnBar .spAct > button[data-s="army"] { padding: 6px; font-weight: bold; }
+  .scWrap { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .scGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 3px; }
+  #spawnBar .scGrid button { margin: 0; padding: 3px 6px; text-align: left; line-height: 1.25; min-width: 0; }
+  .scGrid b, .scGrid small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scGrid b { font-size: 12px; }
+  .scGrid small { font-size: 10.5px; color: #e8c8d8; }
+  #scNow { font-size: 12px; line-height: 1.35; min-height: 16px; }
+  @media (max-width: 1100px) { .spUnits { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  #planTab { position: absolute; right: 0; top: 40%; writing-mode: vertical-rl; padding: 12px 5px; background: var(--ac); z-index: 4; margin: 0; }
+  #planTab.on { right: 270px; }
+  #sideTab { position: absolute; left: 0; top: 40%; writing-mode: vertical-rl; padding: 12px 5px; background: var(--ac); z-index: 4; margin: 0; }
+  #planTab:hover, #sideTab:hover { background: var(--ac2); }
+  body.sideOff #side { display: none; }
+  #menu { --mc: var(--ac); --mh: #b0558a; --mw: 3px; position: fixed; inset: 0; z-index: 100; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+  #menu .mbox { width: 620px; max-width: calc(100vw - 32px); display: flex; flex-direction: column; align-items: center; }
+  #mlogo { width: 100%; aspect-ratio: 1800 / 330; position: relative; overflow: hidden; }
+  #mlogo img { position: absolute; width: 139.44%; left: -19.44%; top: -45.45%; }
+  #mgrid, #mcred { width: 100%; margin-top: 44px; border-top: var(--mw) solid var(--mc); border-bottom: var(--mw) solid var(--mc); }
+  #mgrid { display: grid; grid-template-columns: 1fr 1fr; }
+  #mgrid button { margin: 0; padding: 13px 26px; background: none; border: 0; border-bottom: var(--mw) solid var(--mc); border-radius: 0; color: var(--mc); font: 700 25px Redaction35, Georgia, serif; white-space: nowrap; cursor: pointer; }
+  #mgrid button:nth-child(odd) { text-align: right; border-right: var(--mw) solid var(--mc); }
+  #mgrid button:nth-child(even) { text-align: left; }
+  #mgrid button:nth-last-child(-n+2) { border-bottom: 0; }
+  #menu button:hover { color: var(--mh); background: none; }
+  #mcred { color: var(--mc); font: 22px Redaction35, Georgia, serif; }
+  #mcred .cr { display: grid; grid-template-columns: 1fr 1fr; }
+  #mcred .cr b { text-align: right; padding: 10px 26px; border-right: var(--mw) solid var(--mc); }
+  #mcred .cr span { text-align: left; padding: 10px 26px; }
+  #menu .mfoot { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 22px; color: var(--mc); font-size: 13px; }
+  #menu .mfoot button, #mcred button { margin: 0; padding: 6px 20px; background: none; border: var(--mw) solid var(--mc); border-radius: 0; color: var(--mc); font: 700 18px Redaction35, Georgia, serif; cursor: pointer; }
+  #mcred .back, #mnews .back { display: flex; justify-content: center; padding: 14px 0 10px; }
+  #mnews { width: 100%; margin-top: 44px; border-top: var(--mw) solid var(--mc); border-bottom: var(--mw) solid var(--mc); }
+  #mnewsList { max-height: 52vh; overflow-y: auto; padding: 14px 4px 0; color: #fff; font-size: 13px; text-align: left; }
+  #mnews button { margin: 0; padding: 6px 20px; background: none; border: var(--mw) solid var(--mc); color: var(--mc); font: 700 18px Redaction35, Georgia, serif; cursor: pointer; }
+  #mnews button:hover { border-color: var(--mh); }
+  #mgrid button .dot { display: inline-block; width: 8px; height: 8px; margin-left: 8px; vertical-align: middle; background: var(--hi); }
+  .emo { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -0.2em; background: url('PixelTwemojiMC-9/assets/twemoji/textures/font/emoji.png') 0 0 / 1600% 22400% no-repeat; image-rendering: pixelated; }
+  .emo.fl { background-image: url('PixelTwemojiMC-9/assets/twemoji/textures/font/flags.png'); background-size: 1600% 1700%; }
+  #menu .mfoot button:hover, #mcred button:hover { border-color: var(--mh); }
+  #mlang { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 8px; }
+  #mlang button { margin: 0; padding: 0; width: 44px; height: 44px; background: none; border: var(--mw) solid transparent; cursor: pointer; opacity: 0.55; }
+  #mlang button:hover { opacity: 1; background: none; }
+  #mlang button.on { opacity: 1; border-color: var(--mc); }
+  #mlang img { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+  #menuBtn { position: absolute; top: 8px; left: 8px; z-index: 5; margin: 0; padding: 4px 9px; font-size: 12px; background: var(--ov); border: 2px solid var(--ac); }
+  #menuBtn:hover { background: var(--ac); }
+  #plan { position: absolute; top: 0; right: 0; bottom: 0; width: 270px; background: var(--ov); border-left: 2px solid var(--ac); padding: 10px; overflow-y: auto; z-index: 4; }
+  #planTools button, #planCp { width: 100%; text-align: left; }
+  #planCp { margin: 2px 0 6px; }
+  #planList .kr { border: 1px solid transparent; }
+  #planList .kr.sel { border-color: var(--hi); background: var(--bg3); }
+  #planMsg { color: var(--hi); font-size: 12px; margin-top: 6px; min-height: 16px; }
+  #admin .row button { width: auto; flex: 1; }
+  #campBar { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); background: var(--ov); border: 2px solid var(--ac); padding: 4px 10px; z-index: 3; white-space: nowrap; display: flex; gap: 8px; align-items: center; }
+  #lvSel { position: absolute; inset: 0; z-index: 6; overflow-y: auto; padding: 22px 28px; background: var(--bg); }
+  .lvhead { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .lvhead h2 { font-size: 24px; color: #fff; margin: 0; }
+  .lvgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px; }
+  .lvt { position: relative; background: var(--ac); color: #fff; padding: 34px 10px 16px; text-align: center; cursor: pointer; min-height: 170px;
+    clip-path: polygon(0 18%, 25% 18%, 50% 0, 75% 18%, 100% 18%, 100% 100%, 0 100%); transition: transform .12s, filter .12s; }
+  .lvt:hover { transform: translateY(-4px); filter: brightness(1.2); }
+  .lvt .lvn { font-size: 40px; font-weight: 800; line-height: 1.1; }
+  .lvt .lvnm { font-weight: bold; margin: 2px 0 6px; }
+  .lvt .lvinf { font-size: 12px; margin-bottom: 6px; }
+  .lvt span { font-size: 12px; }
+  .lvt .muted { color: #d9b8cb; }
+  .lvt .ok { color: #9be3a6; font-weight: bold; }
+  .lvt.won { background: var(--on); }
+  .lvt.lock { filter: grayscale(.8) brightness(.6); cursor: not-allowed; }
+  .lvt.empty { background: var(--bg3); }
+  .lvt.add { background: var(--bg2); color: var(--hi); border: 0; }
+  .lvt .lvdel { position: absolute; bottom: 6px; right: 6px; padding: 2px 6px; background: var(--bg); }
+  #lvBar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; background: var(--ov); border-top: 2px solid var(--ac); padding: 6px 10px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  #lvBar .lvtitle { color: var(--hi); margin-right: 6px; }
+  #lvBar .lvmoney { font-size: 14px; margin-right: 8px; }
+  #lvBar .lvmoney b { color: var(--hi); font-size: 17px; }
+  .lvu { display: inline-flex; flex-direction: column; align-items: center; min-width: 70px; padding: 4px 8px; background: var(--ac); }
+  .lvu .ic { font-size: 20px; }
+  .lvu small { color: var(--hi); }
+  .lvu.on { background: var(--on); box-shadow: 0 0 0 2px #fff; }
+  .lvu.poor { opacity: .45; }
+  .lvgo { background: var(--on); font-weight: bold; }
+  .lvgo:hover { background: #b0558a; }
+  #lvMsg { color: var(--hi); margin-left: 6px; }
+  .lvstats { font-size: 14px; font-weight: bold; margin: 0 10px; }
+  #lvEdit { position: absolute; top: 10px; right: 10px; width: 290px; z-index: 4; background: var(--ov); border: 2px solid var(--ac); padding: 10px; max-height: calc(100% - 90px); overflow-y: auto; }
+  #lvEdit input[type=number] { padding: 4px; background: var(--bg2); color: #fff; border: 1px solid var(--ac); font: inherit; }
+  #lvEdit label select { width: 62%; }
+  .lvrow { gap: 3px; }
+  .lvrow .lvpick { width: 92px; text-align: left; }
+  .lvrow .lvcnt { min-width: 30px; text-align: center; color: var(--hi); font-size: 14px; }
+  #lvRes { position: absolute; inset: 0; z-index: 5; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); }
+  .lvcard { background: var(--bg); border: 3px solid var(--ac); padding: 20px 30px; text-align: center; min-width: 320px; }
+  .lvcard .big { font-size: 34px; font-weight: 800; margin-bottom: 8px; }
+  .lvcard.win .big { color: var(--hi); }
+  .lvcard.lose .big { color: #ff6b6b; }
+  .lvcard button { margin: 3px; padding: 7px 12px; }
+  #lvBadge { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 7; background: var(--on); color: #fff; font-weight: bold; padding: 5px 14px; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="menu" class="hidden">
+  <div class="mbox">
+    <div id="mlogo"><img src="sancakTaburu.png" alt="Sancak Taburu"></div>
+    <nav id="mgrid">
+      <button data-m="arena">Savaş Meydanı</button><button data-m="race">Irklar</button>
+      <button data-m="quick">Yeni Dünya</button><button data-m="campBig">Büyük Dünya (test)</button>
+      <button data-m="camp">Dünya (test)</button><button data-m="level">Bölüm Modu (test)</button>
+      <button data-m="news">Yenilikler</button><button data-m="credits">Credits</button>
+    </nav>
+    <div id="mcred" class="hidden"></div>
+    <div id="mnews" class="hidden"><div id="mnewsList"></div><div class="back"><button data-m="back">Geri</button></div></div>
+    <div id="mlang"><button data-l="en" title="English"><img src="english.png" alt="English"></button><button data-l="tr" title="Türkçe"><img src="turkish.png" alt="Türkçe"></button></div>
+    <div class="mfoot"><button data-m="continue" class="hidden">Devam et (Esc)</button><span id="menuVer"></span></div>
+  </div>
+</div>
+<div id="side">
+  <div id="tabs">
+    <button data-t="race">Irk</button><button data-t="world">Dünya</button><button data-t="events">Olaylar</button><button data-t="stats">İstatistik</button>
+  </div>
+  <div id="p-race" class="panel">
+    <h3>Şablon Irklar</h3>
+    <div id="templates" class="row"></div>
+    <h3>Kayıtlı Irkların</h3>
+    <div id="saved" class="row"><span class="muted">Henüz yok</span></div>
+    <h3>İsim</h3>
+    <input id="rName" type="text">
+    <h3>Görünüş</h3>
+    <label>Ten rengi <input id="rSkin" type="color"></label>
+    <label>Kulak <select id="rEars" style="width:60%"><option value="none">Yok / yuvarlak</option><option value="small">Küçük</option><option value="pointy">Sivri</option><option value="big">Kocaman</option></select></label>
+    <label>Özellik <select id="rExtra" style="width:60%"><option value="none">Yok</option><option value="beard">Sakal</option><option value="tusks">Dişler</option><option value="horns">Boynuz</option><option value="snout">Ejder burnu</option><option value="hat">Sivri şapka</option></select></label>
+    <label>Yaşam alanı <select id="rHome" style="width:60%"><option value="grass">Çayır</option><option value="forest">Orman</option><option value="hills">Tepe ve dağ</option></select></label>
+    <label>Boyut <span id="rSizeV"></span></label><input id="rSize" type="range" min="50" max="140">
+    <h3>Özellikler</h3>
+    <div id="statSliders"></div>
+    <label>Ömür (yıl) <span id="rLifeV"></span></label><input id="rLife" type="range" min="30" max="400">
+    <div id="rInfo" class="txt box"></div>
+    <label>Başlangıç nüfusu <span id="rCountV"></span></label><input id="rCount" type="range" min="6" max="40" value="14">
+    <div class="row" style="margin-top:8px">
+      <button id="saveBtn">Kaydet</button>
+      <button id="releaseBtn">Dünyaya Bırak</button>
+    </div>
+    <div id="msg"></div>
+  </div>
+  <div id="p-world" class="panel hidden">
+    <div id="clock" class="txt"></div>
+    <h3>Zaman (1-5: hız · Boşluk: durdur · 0: admin)</h3>
+    <div id="speeds" class="row"></div>
+    <div id="cwPlay" class="txt hidden"></div>
+    <h3>Seçili</h3>
+    <div id="info" class="txt box">Haritada birine ya da bir şehre tıkla.</div>
+    <div id="cwBattles" class="txt hidden"></div>
+    <h3 id="kHead">Krallıklar</h3>
+    <div id="kList"></div>
+  </div>
+  <div id="p-events" class="panel hidden">
+    <h3>Olaylar</h3>
+    <div id="chron" class="txt log"></div>
+  </div>
+  <div id="p-stats" class="panel hidden">
+    <h3>Krallıkların nüfusu (yıllara göre)</h3>
+    <canvas id="popChart" width="300" height="170" style="cursor:crosshair"></canvas>
+    <div id="popLegend" class="txt"></div>
+    <div id="statsBox" class="txt"></div>
+  </div>
+</div>
+<div id="main">
+  <canvas id="cv"></canvas>
+  <div id="hint"></div>
+  <div id="campBar" class="hidden"></div>
+  <div id="admin" class="hidden"></div>
+  <div id="tree" class="hidden"></div>
+  <button id="menuBtn" title="Ana menü">Menü</button>
+  <button id="sideTab" title="Sol paneli aç/kapat">Paneli gizle</button>
+  <button id="planTab">Savaş Planı</button>
+  <div id="plan" class="hidden">
+    <h2>Savaş Planı</h2>
+    <button id="planCp" title="Açıkken komutanlar savaştan önce ordugâh kurar, gücünü tartıp plan yapar, dost komutanlara mesajcı yollar; hazır savaşlar da önce bu hazırlıkla başlar. Kapalıyken ordular doğrudan en yakın düşmana yürür. (Admin panelindeki ayarla aynı)"></button>
+    <div class="txt muted">Bir ordu seç ya da haritada birimleri seç (kutu / Ctrl+tık / çift tık: bütün ordu). Emir sadece seçtiklerine gider.</div>
+    <h3>Ordular</h3>
+    <div id="planList"></div>
+    <div id="planSel" class="txt" style="margin-top:6px"></div>
+    <label>Düzen <select id="planForm" style="width:60%"></select></label>
+    <label>Taktik <select id="planTac" style="width:60%"></select></label>
+    <h3>Emirler</h3>
+    <div id="planTools"></div>
+    <div id="planMsg"></div>
+  </div>
+  <div id="lvSel" class="hidden"></div>
+  <div id="lvBar" class="hidden"></div>
+  <div id="lvEdit" class="hidden"></div>
+  <div id="lvRes" class="hidden"></div>
+  <div id="lvBadge" class="hidden">DÜZENLEME MODU · Numpad * ile kapat</div>
+  <div id="spawnBar" class="hidden">
+    <div id="spSub" class="hidden"></div>
+    <div id="spCats" class="row">
+      <button data-c="army">⚔️ Ordu</button><button data-c="kingdom">🏰 Krallık</button><button data-c="beast">🐺 Hayvan &amp; Canavar</button><button data-c="person">👤 Kişi</button><button data-c="disaster">☄ Afet</button><button data-c="weather">🌦 Hava</button><button data-c="test">🧪 Test</button>
+    </div>
+  </div>
+</div>
+<script src="lang.js"></script>
+<script src="emojimap.js"></script>
+<script src="emoji.js"></script>
+<script src="data.js"></script>
+<script src="world.js"></script>
+<script src="sim.js"></script>
+<script src="navy.js"></script>
+<script src="nature.js"></script>
+<script src="life.js"></script>
+<script src="dangers.js"></script>
+<script src="tactics.js"></script>
+<script src="changelog.js"></script>
+<script src="draw.js"></script>
+<script src="plan.js"></script>
+<script src="cplan.js"></script>
+<script src="field.js"></script>
+<script src="spawn.js"></script>
+<script src="scenario.js"></script>
+<script src="level.js"></script>
+<script src="campaign.js"></script>
+<script src="strategy.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+SANCAK TABURU - LICENSES
+========================
+
+The game itself:
+
+Sancak Taburu (code and original assets)
+  Copyright: 2026 Akgazi
+  License: Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+  License text: LICENSE
+  Attribution: NOTICE (must be kept in all copies and derived works)
+
+The Apache license above does not apply to the third-party content below.
+
+Third-party content used in this game:
+
+Pixel Perfect Twemoji (9x9)
+  Author: Amber
+  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+  Folder: PixelTwemojiMC-9/ (license text: PixelTwemojiMC-9/LICENSE)
+
+Twemoji
+  Copyright: Twitter, Inc. and other contributors
+  License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+  Source: https://github.com/twitter/twemoji
+
+Redaction 35 (font)
+  Copyright: 2019 The Redaction Project Authors (https://github.com/jeremymickel/Redaction)
+  License: SIL Open Font License 1.1
+  Folder: Redaction_35/ (license text: Redaction_35/OFL.txt)
