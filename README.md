@@ -50,6 +50,11 @@ Inspired by games like Totally Accurate Battle Simulator, WorldBox, Hearts of Ir
 
 The graphics are simple because of the scale: this is what makes giant battles with tens of thousands of soldiers possible.
 
+## Play
+
+- **In your browser:** [play it here](https://akgazii.github.io/SancakTaburu/), nothing to install.
+- **Offline:** [download the ZIP](https://github.com/akgazii/SancakTaburu/archive/refs/heads/main.zip), extract it and open `index.html`.
+
 ## Controls
 
 ### General
